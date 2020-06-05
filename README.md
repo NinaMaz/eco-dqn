@@ -3,7 +3,7 @@ This is a coding implementation of  'A fair comparison of ECO-DQN and S2V-DQN me
 The PPO and SAC implementations can be seen here: https://github.com/NinaMaz/eco-dqn/tree/master/src/agents/dqn
 The results of the experiments as well as the trained networks: https://github.com/NinaMaz/eco-dqn/tree/master/ER_20spin
 
-In order to run the training go to section \textb{Requirements} of this README, and using th ecommanda listed there run the corresponding train and test scripts from https://github.com/NinaMaz/eco-dqn/tree/master/experiments/ER_20spin
+In order to run the training, go to section **Requirements** of this README, and using the commands listed there run the corresponding train and test scripts from https://github.com/NinaMaz/eco-dqn/tree/master/experiments/ER_20spin
 
 As the base for this project we have used the implementation of ECO-DQN as reported in "Exploratory Combinatorial Optimization with Reinforcement Learning" ([arXiv link](https://arxiv.org/abs/1909.04063)). The link to the forked repository: https://github.com/tomdbar/eco-dqn
 
