@@ -1,6 +1,7 @@
 # eco-dqn
 This is a coding implementation of  'A fair comparison of ECO-DQN and S2V-DQN method ' project for the Foundations of Data Science course, Skolkovo University of Science and technology made by Nina Mazyavkina, Mikhail Gasanov and Svetlana Illarionova.
-As the base for this project we have used the mplementation of ECO-DQN as reported in "Exploratory Combinatorial Optimization with Reinforcement Learning" ([arXiv link](https://arxiv.org/abs/1909.04063)). The link to the forked repository: https://github.com/tomdbar/eco-dqn
+
+As the base for this project we have used the implementation of ECO-DQN as reported in "Exploratory Combinatorial Optimization with Reinforcement Learning" ([arXiv link](https://arxiv.org/abs/1909.04063)). The link to the forked repository: https://github.com/tomdbar/eco-dqn
 
 ## Requirements
 
@@ -22,7 +23,7 @@ Alternatively, the included [``environment.yml``](environment.yml) file will pro
 
 *Scripts to reproduce the agents trained in the paper can be found in the [``experiments``](experiments) folder.  It is straightforward to modify these to use different training/testing data or parameters.*
 
-##### Reproducing ECO-DQN agents and tests
+##### Reproducing ECO-DQN, ECO-PPO, ECO-SAC, S2V-PPO and S2V-DQN agents and tests
 
 We train agents on two different types of graph called Erdos-Renyi (ER) and Barabasi-Albert (BA).  For each graph type we train the agents on 20, 40, 60, 100, 200 and 500 vertex graphs. *Note the code typically refers to a ***vertex*** as a ***spin***.*
 
