@@ -1,4 +1,2 @@
-*__pycache__*
-.idea*
-.ipynb_checkpoints*
-log_data.pkl
+.DS_Store
+.ipynb_checkpoints/

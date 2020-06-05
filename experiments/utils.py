@@ -55,7 +55,7 @@ def __test_network_batched(network, env_args, graphs_test, device=None, step_fac
 
     def predict(states):
 
-        qs = network(states)
+        qs,_ = network(states)
 
         if acting_in_reversible_spin_env:
             if qs.dim() == 1:

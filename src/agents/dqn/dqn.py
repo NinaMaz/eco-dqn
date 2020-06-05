@@ -21,23 +21,19 @@ class DQN:
     # Required parameters.
     envs : List of environments to use.
     network : Choice of neural network.
-
     # Initial network parameters.
     init_network_params : Pre-trained network to load upon initialisation.
     init_weight_std : Standard deviation of initial network weights.
-
     # DQN parameters
     double_dqn : Whether to use double DQN (DDQN).
     update_target_frequency : How often to update the DDQN target network.
     gamma : Discount factor.
     clip_Q_targets : Whether negative Q targets are clipped (generally True/False for irreversible/reversible agents).
-
     # Replay buffer.
     replay_start_size : The capacity of the replay buffer at which training can begin.
     replay_buffer_size : Maximum buffer capacity.
     minibatch_size : Minibatch size.
     update_frequency : Number of environment steps taken between parameter update steps.
-
     # Learning rate
     update_learning_rate : Whether to dynamically update the learning rate (if False, initial_learning_rate is always used).
     initial_learning_rate : Initial learning rate.
@@ -45,25 +41,20 @@ class DQN:
     peak_learning_rate_step : The timestep (from the start, not from when training starts) at which the peak_learning_rate is found.
     final_learning_rate : The final learning rate.
     final_learning_rate_step : The timestep of the final learning rate.
-
     # Optional regularization.
     max_grad_norm : The norm grad to clip gradients to (None means no clipping).
     weight_decay : The weight decay term for regularisation.
-
     # Exploration
     update_exploration : Whether to update the exploration rate (False would tend to be used with NoisyNet layers).
     initial_exploration_rate : Inital exploration rate.
     final_exploration_rate : Final exploration rate.
     final_exploration_step : Timestep at which the final exploration rate is reached.
-
     # Loss function
     adam_epsilon : epsilon for ADAM optimisation.
     loss="mse" : Loss function to use.
-
     # Saving the agent
     save_network_frequency : Frequency with which the network parameters are saved.
     network_save_path : Folder into which the network parameters are saved.
-
     # Testing the agent
     evaluate : Whether to test the agent during training.
     test_envs : List of test environments.  None means the training environments (envs) are used.
@@ -71,7 +62,6 @@ class DQN:
     test_frequency : Frequency of tests.
     test_save_path : Folder into which the test scores are saved.
     test_metric : The metric used to quantify performance.
-
     # Other
     logging : Whether to log.
     seed : The global seed to set.  None means randomly selected.
@@ -258,7 +248,7 @@ class DQN:
 
         # Initialise the state
         state = torch.as_tensor(self.env.reset())
-        score = 0
+        score = 0.
         losses_eps = []
         t1 = time.time()
 
@@ -310,7 +300,7 @@ class DQN:
                          np.round(score,3),
                          loss_str,
                          round(time.time() - t1, 3)))
-
+                    
                 if self.logging:
                     logger.add_scalar('Episode_score', score, timestep)
                 self.env, self.acting_in_reversible_spin_env = self.get_random_env()
@@ -393,7 +383,7 @@ class DQN:
     @torch.no_grad()
     def __only_bad_actions_allowed(self, state, network):
         x = (state[0, :] == self.allowed_action_state).nonzero()
-        q_next = network(state.to(self.device).float())[x].max()
+        q_next = network(state.to(self.device).float())[0][x].max()
         return True if q_next < 0 else False
 
     def train_step(self, transitions):
@@ -404,18 +394,18 @@ class DQN:
             # Calculate target Q
             with torch.no_grad():
                 if self.double_dqn:
-                    greedy_actions = self.network(states_next.float()).argmax(1, True)
-                    q_value_target = self.target_network(states_next.float()).gather(1, greedy_actions)
+                    greedy_actions = self.network(states_next.float())[0].argmax(1, True)
+                    q_value_target = self.target_network(states_next.float())[0].gather(1, greedy_actions)
                 else:
-                    q_value_target = self.target_network(states_next.float()).max(1, True)[0]
+                    q_value_target = self.target_network(states_next.float())[0].max(1, True)[0]
 
         else:
-            target_preds = self.target_network(states_next.float())
+            target_preds = self.target_network(states_next.float())[0]
             disallowed_actions_mask = (states_next[:, 0, :] != self.allowed_action_state)
             # Calculate target Q, selecting ONLY ALLOWED ACTIONS greedily.
             with torch.no_grad():
                 if self.double_dqn:
-                    network_preds = self.network(states_next.float())
+                    network_preds = self.network(states_next.float())[0]
                     # Set the Q-value of disallowed actions to a large negative number (-10000) so they are not selected.
                     network_preds_allowed = network_preds.masked_fill(disallowed_actions_mask,-10000)
                     greedy_actions = network_preds_allowed.argmax(1, True)
@@ -430,7 +420,7 @@ class DQN:
         td_target = rewards + (1 - dones) * self.gamma * q_value_target
 
         # Calculate Q value
-        q_value = self.network(states.float()).gather(1, actions)
+        q_value = self.network(states.float())[0].gather(1, actions)
 
         # Calculate loss
         loss = self.loss(q_value, td_target, reduction='mean')
@@ -489,7 +479,7 @@ class DQN:
         if acting_in_reversible_spin_env is None:
             acting_in_reversible_spin_env = self.acting_in_reversible_spin_env
 
-        qs = self.network(states)
+        qs,_ = self.network(states)
 
         if acting_in_reversible_spin_env:
             if qs.dim() == 1:

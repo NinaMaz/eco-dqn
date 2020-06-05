@@ -1,6 +1,6 @@
 # eco-dqn
-
-Implementation of ECO-DQN as reported in "Exploratory Combinatorial Optimization with Reinforcement Learning" ([arXiv link](https://arxiv.org/abs/1909.04063)).
+This is a coding implementation of  'A fair comparison of ECO-DQN and S2V-DQN method ' project for the Foundations of Data Science course, Skolkovo University of Science and technology made by Nina Mazyavkina, Mikhail Gasanov and Svetlana Illarionova.
+As the base for this project we have used the mplementation of ECO-DQN as reported in "Exploratory Combinatorial Optimization with Reinforcement Learning" ([arXiv link](https://arxiv.org/abs/1909.04063)). The link to the forked repository: https://github.com/tomdbar/eco-dqn
 
 ## Requirements
 

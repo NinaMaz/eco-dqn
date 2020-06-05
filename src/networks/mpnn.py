@@ -8,7 +8,9 @@ class MPNN(nn.Module):
                  n_layers=3,
                  n_features=64,
                  tied_weights=False,
-                 n_hid_readout=[],):
+                 n_hid_readout=[],
+                 value_layer=False,
+                 n_spins_train = 20):
 
         super().__init__()
 
@@ -29,7 +31,7 @@ class MPNN(nn.Module):
         else:
             self.update_node_embedding_layer = nn.ModuleList([UpdateNodeEmbeddingLayer(n_features) for _ in range(self.n_layers)])
 
-        self.readout_layer = ReadoutLayer(n_features, n_hid_readout)
+        self.readout_layer = ReadoutLayer(n_features, n_hid_readout, value_layer = value_layer, n_spins_train = n_spins_train)
 
     @torch.no_grad()
     def get_normalisation(self, adj):
@@ -71,10 +73,10 @@ class MPNN(nn.Module):
                                                                               norm,
                                                                               adj)
 
-        out = self.readout_layer(current_node_embeddings)
+        out,value = self.readout_layer(current_node_embeddings)
         out = out.squeeze()
 
-        return out
+        return out,value
 
 class EdgeAndNodeEmbeddingLayer(nn.Module):
 
@@ -122,16 +124,20 @@ class UpdateNodeEmbeddingLayer(nn.Module):
 
 class ReadoutLayer(nn.Module):
 
-    def __init__(self, n_features, n_hid=[], bias_pool=False, bias_readout=True):
+    def __init__(self, n_features, n_hid=[], bias_pool=False, bias_readout=True, value_layer=False, n_spins_train = 20):
 
         super().__init__()
 
         self.layer_pooled = nn.Linear(int(n_features), int(n_features), bias=bias_pool)
-
+        
         if type(n_hid)!=list:
             n_hid = [n_hid]
-
-        n_hid = [2*n_features] + n_hid + [1]
+            
+        n_hid = [2*n_features] + n_hid + [1] 
+        self.v_layer = nn.Identity()
+        #*n_spins_train limits the number of spins during test to the same number that has been used during training
+        if value_layer:
+            self.v_layer = nn.Linear(n_hid[-2]*n_spins_train, 1, bias=bias_readout)            
 
         self.layers_readout = []
         for n_in, n_out in list(zip(n_hid, n_hid[1:])):
@@ -149,11 +155,12 @@ class ReadoutLayer(nn.Module):
 
         features = F.relu( torch.cat([f_pooled, f_local], dim=-1) )
 
-        for i, layer in enumerate(self.layers_readout):
+        for i, layer in enumerate(self.layers_readout[:-1]):
             features = layer(features)
-            if i<len(self.layers_readout)-1:
-                features = F.relu(features)
-            else:
-                out = features
-
-        return out
+            #if i<len(self.layers_readout)-1:
+            features = F.relu(features)
+            #else:
+        
+        out = self.layers_readout[-1](features)
+        value = self.v_layer(features.flatten(start_dim=-2))
+        return out, value
